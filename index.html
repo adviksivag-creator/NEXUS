@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS Gaming</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #080b14;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background: #111827;
+  padding: 22px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #263b56;
+}
+
+.logo {
+  color: #52eaff;
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 18px;
+}
+
+.hero {
+  text-align: center;
+  padding: 85px 15px;
+  background: radial-gradient(circle, #19345b, #080b14 70%);
+}
+
+.hero h1 {
+  font-size: clamp(35px, 7vw, 65px);
+  color: #52eaff;
+  text-shadow: 0 0 25px cyan;
+}
+
+.hero p { color: #aabbd3; }
+
+button {
+  background: #52eaff;
+  color: #080b14;
+  border: none;
+  border-radius: 7px;
+  padding: 12px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+}
+
+button:hover {
+  box-shadow: 0 0 18px #52eaff;
+}
+
+section {
+  padding: 40px 7%;
+}
+
+h2 span { color: #52eaff; }
+
+.games {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: #121d30;
+  padding: 22px;
+  border: 1px solid #293e5d;
+  border-radius: 12px;
+  text-align: center;
+  transition: .2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: #52eaff;
+  box-shadow: 0 0 15px #52eaa955;
+}
+
+.emoji { font-size: 45px; }
+
+.card p { color: #aabbd3; }
+
+#gameArea {
+  display: none;
+  background: #121d30;
+  border: 1px solid #52eaff;
+  border-radius: 14px;
+  padding: 25px;
+  margin-top: 30px;
+  text-align: center;
+  min-height: 230px;
+}
+
+#gameArea input {
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #52eaff;
+  margin: 8px;
+  max-width: 90%;
+}
+
+#gameArea h3 { color: #52eaff; }
+
+#result {
+  color: #52eaff;
+  font-size: 20px;
+  margin: 18px;
+}
+
+footer {
+  background: #111827;
+  color: #8495ad;
+  text-align: center;
+  padding: 25px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">NEXUS</div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#games">Games</a>
+  </nav>
+</header>
+
+<div class="hero" id="home">
+  <h1>ENTER THE NEXT LEVEL</h1>
+  <p>10 mini-games. One gaming universe.</p>
+  <button onclick="document.getElementById('games').scrollIntoView({behavior:'smooth'})">
+    PLAY GAMES
+  </button>
+</div>
+
+<section id="games">
+  <h2>EXPLORE <span>GAMES</span></h2>
+
+  <div class="games" id="gameList"></div>
+
+  <div id="gameArea">
+    <h2 id="gameTitle">Game</h2>
+    <div id="gameContent"></div>
+    <div id="result"></div>
+    <button onclick="closeGame()">CLOSE GAME</button>
+  </div>
+</section>
+
+<footer>
+  © 2026 NEXUS Gaming | Built for gamers
+</footer>
+
+<script>
+
+const games = [
+  ["🎯","Click Challenge","Click as fast as possible!"],
+  ["🔢","Number Guess","Find the secret number."],
+  ["✊","Rock Paper Scissors","Challenge the computer."],
+  ["🎲","Dice Roll","Roll the dice!"],
+  ["🧠","Memory Match","Find matching pairs."],
+  ["➗","Math Challenge","Test your math skills."],
+  ["⚡","Reaction Test","Test your reaction speed."],
+  ["⌨️","Typing Challenge","Type the sentence."],
+  ["🎨","Color Match","Find the correct color."],
+  ["🪙","Coin Flip","Heads or tails?"]
+];
+
+const gameList = document.getElementById("gameList");
+
+games.forEach((game, i) => {
+  gameList.innerHTML += `
+    <div class="card">
+      <div class="emoji">${game[0]}</div>
+      <h3>${i+1}. ${game[1]}</h3>
+      <p>${game[2]}</p>
+      <button onclick="startGame(${i})">PLAY NOW</button>
+    </div>
+  `;
+});
+
+let timer;
+let timeout;
+
+function startGame(id) {
+  clearInterval(timer);
+  clearTimeout(timeout);
+
+  const area = document.getElementById("gameArea");
+  const content = document.getElementById("gameContent");
+
+  area.style.display = "block";
+  document.getElementById("gameTitle").textContent = games[id][1];
+  document.getElementById("result").textContent = "";
+
+  area.scrollIntoView({behavior:"smooth"});
+
+  const result = document.getElementById("result");
+
+  if(id === 0) {
+    let score = 0;
+    let seconds = 10;
+    content.innerHTML = `
+      <h3>Click the button as many times as possible!</h3>
+      <p>Time: <span id="time">10</span></p>
+      <h3>Score: <span id="score">0</span></h3>
+      <button id="clicker">CLICK ME!</button>
+    `;
+    document.getElementById("clicker").onclick = () => {
+      if(seconds > 0) {
+        score++;
+        document.getElementById("score").textContent = score;
+      }
+    };
+    timer = setInterval(() => {
+      seconds--;
+      document.getElementById("time").textContent = seconds;
+      if(seconds <= 0) {
+        clearInterval(timer);
+        result.textContent = "Game over! Score: " + score;
+      }
+    }, 1000);
+  }
+
+  if(id === 1) {
+    const secret = Math.floor(Math.random()*100)+1;
+    content.innerHTML = `
+      <p>Guess a number between 1 and 100.</p>
+      <input id="guess" type="number" min="1" max="100">
+      <button onclick="checkGuess()">GUESS</button>
+    `;
+    window.checkGuess = () => {
+      const n = Number(document.getElementById("guess").value);
+      if(n === secret) result.textContent = "Correct! You won! 🎉";
+      else if(n < secret) result.textContent = "Too low! Try again.";
+      else result.textContent = "Too high! Try again.";
+    };
+  }
+
+  if(id === 2) {
+    content.innerHTML = `
+      <p>Choose your move!</p>
+      <button onclick="rps('Rock')">✊ Rock</button>
+      <button onclick="rps('Paper')">✋ Paper</button>
+      <button onclick="rps('Scissors')">✌️ Scissors</button>
+    `;
+    window.rps = (choice) => {
+      const choices = ["Rock","Paper","Scissors"];
+      const computer = choices[Math.floor(Math.random()*3)];
+      let answer = choice === computer ? "It's a tie!" :
+        ((choice==="Rock" && computer==="Scissors") ||
+         (choice==="Paper" && computer==="Rock") ||
+         (choice==="Scissors" && computer==="Paper"))
+        ? "You win! 🎉" : "Computer wins!";
+      result.textContent = choice + " vs " + computer + ". " + answer;
+    };
+  }
+
+  if(id === 3) {
+    content.innerHTML = `
+      <h3 id="dice">🎲</h3>
+      <button onclick="rollDice()">ROLL DICE</button>
+    `;
+    window.rollDice = () => {
+      document.getElementById("dice").textContent =
+        ["⚀","⚁","⚂","⚃","⚄","⚅"][Math.floor(Math.random()*6)];
+    };
+  }
+
+  if(id === 4) {
+    const symbols = ["🚀","🎮","⭐","🎯","🚀","🎮","⭐","🎯"];
+    symbols.sort(() => Math.random()-.5);
+    let open = [];
+    let matched = [];
+    content.innerHTML = `<p>Find all four matching pairs!</p><div id="memory" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:340px;margin:auto"></div>`;
+    const board = document.getElementById("memory");
+    symbols.forEach((s,i) => {
+      const b = document.createElement("button");
+      b.textContent = "?";
+      b.style.fontSize = "24px";
+      b.onclick = () => {
+        if(open.length === 2 || matched.includes(i) || open.includes(i)) return;
+        b.textContent = s;
+        open.push(i);
+        if(open.length === 2) {
+          if(symbols[open[0]] === symbols[open[1]]) {
+            matched.push(...open);
+            open = [];
+            if(matched.length === 8) result.textContent = "You matched them all! 🎉";
+          } else {
+            const pair = [...open];
+            setTimeout(() => {
+              pair.forEach(j => board.children[j].textContent = "?");
+              open = [];
+            }, 800);
+          }
+        }
+      };
+      board.appendChild(b);
+    });
+  }
+
+  if(id === 5) {
+    let count = 0;
+    let points = 0;
+    function question() {
+      if(count === 5) {
+        result.textContent = "Finished! Score: " + points + "/5";
+        return;
+      }
+      const a = Math.floor(Math.random()*12)+1;
+      const b = Math.floor(Math.random()*12)+1;
+      content.innerHTML = `
+        <h3>${a} + ${b} = ?</h3>
+        <input type="number" id="answer">
+        <button id="submitAnswer">SUBMIT</button>
+      `;
+      document.getElementById("submitAnswer").onclick = () => {
+        if(Number(document.getElementById("answer").value) === a+b) points++;
+        count++;
+        result.textContent = "Question " + count + " of 5";
+        question();
+      };
+    }
+    question();
+  }
+
+  if(id === 6) {
+    content.innerHTML = `
+      <p>Wait for the screen to turn GREEN, then click it!</p>
+      <button id="reaction" style="background:#34516b;color:white">START</button>
+    `;
+    const b = document.getElementById("reaction");
+    let start;
+    b.onclick = () => {
+      if(b.dataset.ready === "yes") {
+        result.textContent = "Your reaction time: " + (Date.now()-start) + " ms!";
+        b.dataset.ready = "done";
+        b.textContent = "PLAY AGAIN";
+      } else if(b.dataset.ready !== "wait") {
+        b.dataset.ready = "wait";
+        b.textContent = "WAIT...";
+        timeout = setTimeout(() => {
+          start = Date.now();
+          b.dataset.ready = "yes";
+          b.textContent = "CLICK NOW!";
+          b.style.background = "#22bb66";
+        }, 1500 + Math.random()*2500);
+      } else {
+        clearTimeout(timeout);
+        b.dataset.ready = "done";
+        b.textContent = "Too early! Try again.";
+      }
+    };
+  }
+
+  if(id === 7) {
+    const phrase = "NEXUS GAMING IS AWESOME";
+    content.innerHTML = `
+      <h3>${phrase}</h3>
+      <input id="typing" placeholder="Type the sentence here">
+      <button id="typeButton">CHECK</button>
+    `;
+    document.getElementById("typeButton").onclick = () => {
+      result.textContent =
+        document.getElementById("typing").value.trim() === phrase
+        ? "Perfect typing! 🎉" : "Not quite! Try again.";
+    };
+  }
+
+  if(id === 8) {
+    const colors = ["RED","BLUE","GREEN","PURPLE"];
+    const target = colors[Math.floor(Math.random()*4)];
+    content.innerHTML = `
+      <h3>Find this color: ${target}</h3>
+      ${colors.map(c => `<button style="background:${c.toLowerCase()};color:white" onclick="colorChoice('${c}')">${c}</button>`).join("")}
+    `;
+    window.colorChoice = c => {
+      result.textContent = c === target ? "Correct! 🎉" : "Try again!";
+    };
+  }
+
+  if(id === 9) {
+    content.innerHTML = `
+      <h3>Choose heads or tails!</h3>
+      <button onclick="flip('Heads')">HEADS</button>
+      <button onclick="flip('Tails')">TAILS</button>
+    `;
+    window.flip = choice => {
+      const outcome = Math.random() < .5 ? "Heads" : "Tails";
+      result.textContent = "It landed on " + outcome + "! " +
+        (choice === outcome ? "You win! 🎉" : "Try again!");
+    };
+  }
+}
+
+function closeGame() {
+  clearInterval(timer);
+  clearTimeout(timeout);
+  document.getElementById("gameArea").style.display = "none";
+}
+
+</script>
+</body>
+</html>
